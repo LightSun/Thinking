@@ -1,0 +1,23 @@
+group 'com.heaven7.java.thinking.vsync'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    jcenter()
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+    maven{
+        url "https://dl.bintray.com/lightsun/maven"
+    }
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    compile 'com.heaven7.java.pc:Produce-consume:1.0.0'
+    compile 'com.heaven7.java.base:Java-base:1.2.0'
+}
