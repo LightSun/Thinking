@@ -44,27 +44,29 @@ public final class Vsync implements Runnable {
         final long delay = 1000 / fps; //ms
         final int size = hs.length;
 
-        long cost;
+        long cost, oldStartTime;
         long st;
         try {
-            while (mCanceled.get()) {
+            while (!mCanceled.get()) {
+                System.out.println("start Render at time: " + startTime);
                 for (int i = 0; i < size; i++) {
                     st = getCurrentTime();
                     hs[i].render(workers[i], mTempInfo);
                     mTempInfo.renderCostTime = getCurrentTime() - st;
                     mLog.logRender(workers[i], mTempInfo);
                 }
-                cost = getCurrentTime() - startTime;
-                if (cost >= delay) {
-                    mLog.logWarn(mTempInfo, "render cost to much time. ");
-                } else {
-                    Thread.sleep(delay - cost);
-                }
+                oldStartTime = startTime;
                 startTime += delay;
                 mRunInfo.renderIndex ++;
                 mTempInfo.renderIndex = mRunInfo.renderIndex;
                 mTempInfo.renderStartTime = mRunInfo.renderStartTime = startTime;
+                cost = getCurrentTime() - oldStartTime;
                 mTempInfo.lastVsyncCost = mRunInfo.lastVsyncCost = cost;
+                if (cost >= delay) {
+                    mLog.logWarn(mTempInfo, "render cost to much time. cost = " + cost + " ,expect delay = " + delay);
+                } else {
+                    Thread.sleep(delay - cost);
+                }
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -92,6 +94,21 @@ public final class Vsync implements Runnable {
                 mThread = new Thread(this);
             }
             mThread.start();
+        }
+    }
+    public boolean isCancelled(){
+        return mCanceled.get();
+    }
+    public void startIfNeed(){
+        if(isCancelled()){
+            start();
+        }
+    }
+    public void join(){
+        try {
+            mThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
